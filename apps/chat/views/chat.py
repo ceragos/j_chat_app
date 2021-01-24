@@ -30,7 +30,3 @@ class MessageModelViewSet(ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageModelSerializer
     permission_classes = (AllowAny,)
-
-    def dispatch(self, request, *args, **kwargs):
-        print(request.POST)
-        return super(MessageModelViewSet, self).dispatch(request, *args, **kwargs)

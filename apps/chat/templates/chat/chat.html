@@ -81,13 +81,21 @@
                                 <ul class="chat-box chatContainerScroll" id="chatContainerScroll">
 
                                 </ul>
-                                <div class="form-group input-group mt-3 mb-0">
+                                <form action="" type="POST" enctype="multipart/formdata" >
+                                    <div class="form-group input-group mt-3 mb-0">
                                         <textarea class="form-control" rows="1" id="content"
                                                   placeholder="Type your message here..."></textarea>
-                                    <button class="msg_send_btn" type="button" id="send" disabled>
-                                        <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
-                                    </button>
-                                </div>
+                                        <div class="input-group-append">
+                                            <button class="msg_img_btn" type="button" id="img-button">
+                                                <i class="fa fa-photo" aria-hidden="true"></i>
+                                            </button>
+                                            <input type="file" id="img-input" accept="image/*" hidden>
+                                            <button class="msg_send_btn" type="button" id="send" disabled>
+                                                <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -106,6 +114,7 @@
 <script src="{% static 'core/assets/js/bootstrap/4.1.1/popper.min.js' %}"></script>
 <script src="{% static 'core/assets/js/bootstrap/4.1.1/bootstrap.min.js' %}"></script>
 <script type="text/javascript">
+
     function docReady(fn) {
         // see if DOM is already available
         if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -146,33 +155,47 @@
     var send = document.getElementById("send");
     send.addEventListener("click", function () {
         var content = encodeURIComponent(document.getElementById("content").value); // &
+        const formData = new FormData();
+        formData.append('user', {{ request.user.id }});
         var data = {'content': content, 'user': {{ request.user.id }}};
-
+        const url = "/messages/";
+        var headers = {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Accept": "application/json",
+            'Content-Type': 'application/json'
+        };
         if (content.length > 0) {
+            formData.append('content', content);
             document.getElementById("content").value = '';
             send.disabled = true;
-            const url = "/messages/";
             fetch(url,
                 {
                     credentials: 'same-origin',
                     method: 'POST',
                     body: JSON.stringify(data),
-                    headers: {
-                        "X-CSRFToken": getCookie("csrftoken"),
-                        "Accept": "application/json",
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                 })
                 .then(response => response.json())
                 .then(function (data) {
                     addElementMessage(data);
                 })
+        } else {
         }
     });
 
     // Evento que activa o desactiva el botón dependiendo de si hay o no mensaje
     var content = document.getElementById("content");
     content.addEventListener("keyup", function () {
+        if (!this.checkValidity() || !this.value) {
+            send.disabled = true;
+        } else {
+            send.disabled = false;
+        }
+    });
+
+    // Evento que activa o desactiva el botón dependiendo de si hay o no imagen
+    var imgInput = document.getElementById("img-input");
+    imgInput.addEventListener("change", function () {
         if (!this.checkValidity() || !this.value) {
             send.disabled = true;
         } else {
@@ -281,6 +304,11 @@
                 document.getElementById('message' + id).remove()
             })
     }
+
+    btnImg = document.getElementById('img-button');
+    btnImg.addEventListener('click', function () {
+        document.getElementById('img-input').click();
+    });
 
     ScrollBottomInThread();
 </script>
