@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView
 from rest_framework import viewsets, mixins
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from apps.chat.models import Message
@@ -28,3 +29,8 @@ class ChatTemplateView(TemplateView):
 class MessageModelViewSet(ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageModelSerializer
+    permission_classes = (AllowAny,)
+
+    def dispatch(self, request, *args, **kwargs):
+        print(request.POST)
+        return super(MessageModelViewSet, self).dispatch(request, *args, **kwargs)

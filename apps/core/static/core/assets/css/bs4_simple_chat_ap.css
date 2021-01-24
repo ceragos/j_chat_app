@@ -389,10 +389,17 @@ ul {
     top: 11px;
     width: 33px;
   }
-  .chatContainerScroll{
+
+.msg_send_btn:disabled,
+.msg_send_btn[disabled]{
+    border: 1px solid #999999;
+    background: rgba(5, 114, 143, 0.6) none repeat scroll 0 0;
+}
+
+.chatContainerScroll{
     height: 516px;
     overflow-y: auto;
-  }
+}
 
 .options-btn {
     background-color: transparent !important;

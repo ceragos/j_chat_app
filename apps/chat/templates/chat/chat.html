@@ -41,7 +41,8 @@
                                 <ul class="users">
                                     <li class="person active-user" data-chat="person1">
                                         <div class="dropdown">
-                                            <button class="btn dropdown-toggle options-btn" type="button" id="dropdownMenu"
+                                            <button class="btn dropdown-toggle options-btn" type="button"
+                                                    id="dropdownMenu"
                                                     data-toggle="dropdown" aria-haspopup="true"
                                                     aria-expanded="false">
                                                 <div class="user">
@@ -77,48 +78,15 @@
                         </div>
                         <div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
                             <div class="chat-container">
-                                <ul class="chat-box chatContainerScroll">
-                                    {% for message in messages %}
-                                        {% if message.user == request.user %}
-                                            <li class="chat-right">
-                                                <div class="chat-hour">{{ message.created | time }} <span
-                                                        class="fa fa-check-circle"></span></div>
-                                                <div class="chat-text">
-                                                    {{ message.content }}
-                                                </div>
-                                                <div class="chat-avatar">
-                                                    <img src="https://www.gravatar.com/avatar/{{ message.user.get_username_encrypt_md5 }}?d=identicon"
-                                                         alt="Retail Admin">
-                                                    <div class="chat-name">{{ message.user.username }}</div>
-                                                </div>
-                                            </li>
-                                        {% else %}
-                                            <li class="chat-left">
-                                                <div class="chat-avatar">
-                                                    <img src="https://www.gravatar.com/avatar/{{ message.user.get_username_encrypt_md5 }}?d=identicon"
-                                                         alt="Retail Admin">
-                                                    <div class="chat-name">{{ message.user.username }}</div>
-                                                </div>
-                                                <div class="chat-text">
-                                                    {{ message.content }}
-                                                </div>
-                                                <div class="chat-hour">{{ message.created | time }} <span
-                                                        class="fa fa-check-circle"></span></div>
-                                            </li>
-                                        {% endif %}
-                                    {% empty %}
-                                        <li class="chat-left">
-                                            <div class="text-info">
-                                                Not Messages
-                                            </div>
-                                        </li>
-                                    {% endfor %}
+                                <ul class="chat-box chatContainerScroll" id="chatContainerScroll">
+
                                 </ul>
                                 <div class="form-group input-group mt-3 mb-0">
-                                    <textarea class="form-control" rows="1"
-                                              placeholder="Type your message here..."></textarea>
-                                    <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
-                                                                                  aria-hidden="true"></i></button>
+                                        <textarea class="form-control" rows="1" id="content"
+                                                  placeholder="Type your message here..."></textarea>
+                                    <button class="msg_send_btn" type="button" id="send" disabled>
+                                        <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -132,12 +100,170 @@
         <!-- Row end -->
 
     </div>
-    <!-- Content wrapper end -->
-    <script src="{% static 'core/assets/js/bootstrap/4.1.1/jquery.min.js' %}"></script>
-    <script src="{% static 'core/assets/js/bootstrap/4.1.1/popper.min.js' %}"></script>
-    <script src="{% static 'core/assets/js/bootstrap/4.1.1/bootstrap.min.js' %}"></script>
-    <script type="text/javascript">
+</div>
+<!-- Content wrapper end -->
+<script src="{% static 'core/assets/js/bootstrap/4.1.1/jquery.min.js' %}"></script>
+<script src="{% static 'core/assets/js/bootstrap/4.1.1/popper.min.js' %}"></script>
+<script src="{% static 'core/assets/js/bootstrap/4.1.1/bootstrap.min.js' %}"></script>
+<script type="text/javascript">
+    function docReady(fn) {
+        // see if DOM is already available
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            // call on next available tick
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
 
-    </script>
+    docReady(function() {
+        const url = "/messages/";
+        fetch(url,
+            {
+                credentials: 'include',
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(function (array) {
+                if (array) {
+                    for (i = 0; i < array.length; i++) {
+                        addMessages(array[i]);
+                    }
+                } else {
+                    var message = document.createElement('li');
+                    message.classList.add('chat-right');
+                    message.innerHTML = '' +
+                    '<li class="chat-left">'+
+                        '<div class="text-info">'+
+                            'Not Messages'+
+                        '</div>'+
+                    '</li>';
+                    document.getElementById("chatContainerScroll").appendChild(message);   // Lo añadimos a la div chatContainerScroll
+                }
+            })
+    });
+
+    var send = document.getElementById("send");
+    send.addEventListener("click", function () {
+        var content = encodeURIComponent(document.getElementById("content").value); // &
+        var data = {'content': content, 'user': {{ request.user.id }}};
+
+        if (content.length > 0) {
+            document.getElementById("content").value = '';
+            send.disabled = true;
+            const url = "/messages/";
+            fetch(url,
+                {
+                    credentials: 'same-origin',
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Accept": "application/json",
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(function (data) {
+                    addMessages(data);
+                })
+        }
+    });
+
+    // Evento que activa o desactiva el botón dependiendo de si hay o no mensaje
+    var content = document.getElementById("content");
+    content.addEventListener("keyup", function () {
+        if (!this.checkValidity() || !this.value) {
+            send.disabled = true;
+        } else {
+            send.disabled = false;
+        }
+    });
+
+    // Forzar el Scroll hasta abajo
+    function ScrollBottomInThread() {
+        var thread = document.getElementById("chatContainerScroll");
+        thread.scrollTop = thread.scrollHeight;
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function addMessages(data) {
+        // Si el mensaje se ha creado correctamente
+        if (data.created) {
+            // Creamos una nueva capa dinámicamente con el mensaje
+            var message = document.createElement('li');
+            message.classList.add('chat-right');
+            created = new Date(data.created);
+            if (data.owner) {
+                message.innerHTML = '' +
+                '<div class="chat-hour">' +
+                    getHourMinutesCreated(created) +
+                    '<span class="fa fa-check-circle"></span>' +
+                '</div>' +
+                '<div class="chat-text">' +
+                    decodeURIComponent(data.content) +
+                '</div>' +
+                '<div class="dropdown">' +
+                    '<button class="btn dropdown-toggle options-btn" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                    '</button>' +
+                    '<div class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                        '<a class="dropdown-item" href="messages/' + data.id + '">Eliminar</a>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="chat-avatar">' +
+                    '<img src="https://www.gravatar.com/avatar/' + data.username_encrypt_md5 + '?d=identicon" alt="Retail Admin">' +
+                    '<div class="chat-name">' + data.username + '</div>' +
+                '</div>';
+            } else {
+                message.innerHTML = '' +
+                '<div class="chat-avatar">'+
+                    '<img src="https://www.gravatar.com/avatar/' + data.username_encrypt_md5 + '?d=identicon" alt="Retail Admin">'+
+                    '<div class="chat-name">' + data.username + '</div>'+
+                '</div>'+
+                '<div class="chat-text">'+
+                    decodeURIComponent(data.content) +
+                '</div>'+
+                '<div class="chat-hour">'+
+                    getHourMinutesCreated(created) +
+                    '<span class="fa fa-check-circle"></span>'+
+                '</div>';
+            }
+            document.getElementById("chatContainerScroll").appendChild(message);   // Lo añadimos a la div chatContainerScroll
+            ScrollBottomInThread();  // Movemos el scrol hasta abajo
+        } else {
+            console.log("El mensaje no se ha podido añadir.")
+        }
+    }
+
+    function getHourMinutesCreated(date) {
+        hour = created.getHours();
+        minutes = created.getMinutes();
+        if (hour <= 9) {
+            hour = '0' + hour;
+        }
+        if (minutes <= 9) {
+            minutes = '0' + minutes
+        }
+        return hour + ':' + minutes
+    }
+
+    ScrollBottomInThread();
+</script>
+
 </body>
 </html>

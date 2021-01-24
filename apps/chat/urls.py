@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from apps.chat.views import ChatTemplateView, MessageModelViewSet
 
 router = DefaultRouter()
-router.register(r'messages', MessageModelViewSet)
+router.register(r'messages', MessageModelViewSet, basename='messges')
 
 urlpatterns = [
     path('', login_required(ChatTemplateView.as_view()), name='home'),
