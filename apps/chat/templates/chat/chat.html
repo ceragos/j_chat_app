@@ -154,18 +154,11 @@
 
     var send = document.getElementById("send");
     send.addEventListener("click", function () {
-        var content = encodeURIComponent(document.getElementById("content").value); // &
-        const formData = new FormData();
-        formData.append('user', {{ request.user.id }});
-        var data = {'content': content, 'user': {{ request.user.id }}};
+        const idUsuario = parseInt({{ request.user.id }});
         const url = "/messages/";
-        var headers = {
-            "X-CSRFToken": getCookie("csrftoken"),
-            "Accept": "application/json",
-            'Content-Type': 'application/json'
-        };
+        var content = encodeURIComponent(document.getElementById("content").value); // &
         if (content.length > 0) {
-            formData.append('content', content);
+            var data = {'content': content, 'user': idUsuario};
             document.getElementById("content").value = '';
             send.disabled = true;
             fetch(url,
@@ -173,7 +166,11 @@
                     credentials: 'same-origin',
                     method: 'POST',
                     body: JSON.stringify(data),
-                    headers: headers,
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Accept": "application/json",
+                        'Content-Type': 'application/json'
+                    },
                 })
                 .then(response => response.json())
                 .then(function (data) {
@@ -230,17 +227,22 @@
         if (data.created) {
             // Creamos una nueva capa dinámicamente con el mensaje
             var message = document.createElement('li');
-            message.classList.add('chat-right');
             message.setAttribute('id', 'message' + data.id);
             created = new Date(data.created);
+            if (data.content != null){
+                mensaje = decodeURIComponent(data.content);
+            } else {
+                mensaje = '<img src="' + data.image + '" alt="" with="200" height="200">'
+            }
             if (data.owner) {
+                message.classList.add('chat-right');
                 message.innerHTML = '' +
                 '<div class="chat-hour">' +
                     getHourMinutesCreated(created) +
                     '<span class="fa fa-check-circle"></span>' +
                 '</div>' +
                 '<div class="chat-text">' +
-                    decodeURIComponent(data.content) +
+                    mensaje +
                 '</div>' +
                 '<div class="dropdown">' +
                     '<button class="btn dropdown-toggle options-btn" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
@@ -256,13 +258,14 @@
                     '<div class="chat-name">' + data.username + '</div>' +
                 '</div>';
             } else {
+                message.classList.add('chat-left');
                 message.innerHTML = '' +
                 '<div class="chat-avatar">'+
                     '<img src="https://www.gravatar.com/avatar/' + data.username_encrypt_md5 + '?d=identicon" alt="Retail Admin">'+
                     '<div class="chat-name">' + data.username + '</div>'+
                 '</div>'+
                 '<div class="chat-text">'+
-                    decodeURIComponent(data.content) +
+                    mensaje +
                 '</div>'+
                 '<div class="chat-hour">'+
                     getHourMinutesCreated(created) +
