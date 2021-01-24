@@ -1,6 +1,9 @@
 from django.views.generic import TemplateView
+from rest_framework import viewsets, mixins
+from rest_framework.viewsets import ModelViewSet
 
 from apps.chat.models import Message
+from apps.chat.serializers import MessageModelSerializer
 from apps.usuarios.models import User
 
 
@@ -20,3 +23,8 @@ class ChatTemplateView(TemplateView):
     def get_all_messages(self):
         messages = Message.objects.all()
         return messages
+
+
+class MessageModelViewSet(ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageModelSerializer

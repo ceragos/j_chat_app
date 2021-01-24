@@ -1,1 +1,1 @@
-from .chat import ChatTemplateView
+from .chat import ChatTemplateView, MessageModelViewSet
