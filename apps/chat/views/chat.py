@@ -1,5 +1,4 @@
 from django.views.generic import TemplateView
-from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 

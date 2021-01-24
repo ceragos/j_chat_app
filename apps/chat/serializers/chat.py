@@ -6,7 +6,7 @@ from apps.chat.models import Message
 class MessageModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'user', 'content', 'created']
+        fields = ['id', 'user', 'content', 'image', 'created']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
