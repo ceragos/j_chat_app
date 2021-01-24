@@ -127,7 +127,7 @@
             .then(function (array) {
                 if (array) {
                     for (i = 0; i < array.length; i++) {
-                        addMessages(array[i]);
+                        addElementMessage(array[i]);
                     }
                 } else {
                     var message = document.createElement('li');
@@ -165,7 +165,7 @@
                 })
                 .then(response => response.json())
                 .then(function (data) {
-                    addMessages(data);
+                    addElementMessage(data);
                 })
         }
     });
@@ -202,12 +202,13 @@
         return cookieValue;
     }
 
-    function addMessages(data) {
+    function addElementMessage(data) {
         // Si el mensaje se ha creado correctamente
         if (data.created) {
             // Creamos una nueva capa dinámicamente con el mensaje
             var message = document.createElement('li');
             message.classList.add('chat-right');
+            message.setAttribute('id', 'message' + data.id);
             created = new Date(data.created);
             if (data.owner) {
                 message.innerHTML = '' +
@@ -222,7 +223,9 @@
                     '<button class="btn dropdown-toggle options-btn" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
                     '</button>' +
                     '<div class="dropdown-menu" aria-labelledby="dropdownMenu">' +
-                        '<a class="dropdown-item" href="messages/' + data.id + '">Eliminar</a>' +
+                        '<button class="dropdown-item" onclick="deleteMessage(' + data.id + ')">' +
+                            'Eliminar' +
+                        '</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="chat-avatar">' +
@@ -260,6 +263,23 @@
             minutes = '0' + minutes
         }
         return hour + ':' + minutes
+    }
+
+    function deleteMessage(id) {
+        const url = '/messages/' + id;
+        fetch(url,
+            {
+                credentials: 'same-origin',
+                method: 'DELETE',
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Accept": "application/json",
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(function () {
+                document.getElementById('message' + id).remove()
+            })
     }
 
     ScrollBottomInThread();
