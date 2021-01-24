@@ -393,3 +393,7 @@ ul {
     height: 516px;
     overflow-y: auto;
   }
+
+.options-btn {
+    background-color: transparent !important;
+}

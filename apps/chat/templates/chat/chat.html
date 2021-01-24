@@ -20,9 +20,6 @@
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                 <h5 class="title text-center">J Chat App</h5>
             </div>
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                <a class="text-right" href="{% url 'usuario:logout' %}">Logout</a>
-            </div>
         </div>
     </div>
     <!-- Page header end -->
@@ -43,16 +40,23 @@
                             <div class="users-container">
                                 <ul class="users">
                                     <li class="person active-user" data-chat="person1">
-                                        <div class="btn-group" role="group">
-                                            <div class="user">
-                                                <img src="https://www.gravatar.com/avatar/{{ request.user.get_username_encrypt_md5 }}?d=identicon"
-                                                     alt="Retail Admin">
-                                                <span class="status online"></span>
+                                        <div class="dropdown">
+                                            <button class="btn dropdown-toggle options-btn" type="button" id="dropdownMenu"
+                                                    data-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false">
+                                                <div class="user">
+                                                    <img src="https://www.gravatar.com/avatar/{{ request.user.get_username_encrypt_md5 }}?d=identicon"
+                                                         alt="Retail Admin">
+                                                    <span class="status online"></span>
+                                                </div>
+                                                <p class="name-time">
+                                                    <span class="name">{{ request.user.username }}</span><br>
+                                                    <span class="time">{{ request.user.last_login }}</span>
+                                                </p>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu">
+                                                <a class="dropdown-item" href="{% url 'usuario:logout' %}">Logout</a>
                                             </div>
-                                            <p class="name-time">
-                                                <span class="name">{{ request.user.username }}</span><br>
-                                                <span class="time">{{ request.user.last_login }}</span>
-                                            </p>
                                         </div>
                                     </li>
                                     {% for user in users %}
@@ -129,13 +133,11 @@
 
     </div>
     <!-- Content wrapper end -->
+    <script src="{% static 'core/assets/js/bootstrap/4.1.1/jquery.min.js' %}"></script>
+    <script src="{% static 'core/assets/js/bootstrap/4.1.1/popper.min.js' %}"></script>
+    <script src="{% static 'core/assets/js/bootstrap/4.1.1/bootstrap.min.js' %}"></script>
+    <script type="text/javascript">
 
-</div>
-<script src="{% static 'core/assets/js/bootstrap/4.3.1/popper.min.js' %}"></script>
-<script src="{% static 'core/assets/js/bootstrap/4.3.1/jquery-3.3.1.slim.min.js' %}"></script>
-<script src="{% static 'core/assets/js/bootstrap/4.3.1/bootstrap.min.js' %}"></script>
-<script type="text/javascript">
-
-</script>
+    </script>
 </body>
 </html>
