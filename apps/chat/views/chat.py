@@ -18,5 +18,5 @@ class ChatTemplateView(TemplateView):
         return users
 
     def get_all_messages(self):
-        users = Message.objects.all()
-        return users
+        messages = Message.objects.all()
+        return messages
