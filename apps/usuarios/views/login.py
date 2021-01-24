@@ -8,7 +8,7 @@ from django.views.generic import FormView
 class LoginView(FormView):
     form_class = AuthenticationForm
     template_name = 'usuarios/login.html'
-    success_url = reverse_lazy('core:home')
+    success_url = reverse_lazy('chat:home')
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -18,4 +18,5 @@ class LoginView(FormView):
 
     def form_valid(self, form):
         login(self.request, form.get_user())
+        self.request.user.set_online()
         return super(LoginView, self).form_valid(form)
