@@ -177,6 +177,32 @@
                     addElementMessage(data);
                 })
         } else {
+            var imgInput = document.getElementById("img-input");
+            const formData = new FormData();
+            document.getElementById("img-input").value = '';
+            send.disabled = true;
+            formData.append('user', idUsuario);
+            var input = document.querySelector('input[type="file"]');
+            for (const file of input.files) {
+              formData.append('image', file, file.name);
+            }
+            fetch(url,
+                {
+                    credentials: 'same-origin',
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Accept": "*/*",
+                        'Content-Type': 'multipart/form-data; boundary=something'
+                    },
+                })
+                .then(response => response.json())
+                .then(function (data) {
+                    // Error FormData convierte el pk del usuario de int a str
+                    alert(data['user'] + ' : /');
+                    addElementMessage(data);
+                })
         }
     });
 
